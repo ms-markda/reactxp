@@ -84,9 +84,13 @@ var ScrollView = (function (_super) {
     function ScrollView(props) {
         var _this = _super.call(this, props) || this;
         _this._customScrollbarEnabled = true;
+        _this._mounted = false;
         _this._dragging = false;
         // Throttled scroll handler
         _this._onScroll = _.throttle(function (e) {
+            if (!_this._mounted) {
+                return;
+            }
             if (_this._customScrollbarEnabled) {
                 _this._customScrollbar.update();
             }
@@ -176,6 +180,7 @@ var ScrollView = (function (_super) {
     };
     ScrollView.prototype.componentDidMount = function () {
         _super.prototype.componentDidMount.call(this);
+        this._mounted = true;
         if (this._customScrollbarEnabled) {
             var element = ReactDOM.findDOMNode(this);
             if (element) {
@@ -190,6 +195,7 @@ var ScrollView = (function (_super) {
     };
     ScrollView.prototype.componentWillUnmount = function () {
         _super.prototype.componentWillUnmount.call(this);
+        this._mounted = false;
         if (this._customScrollbarEnabled) {
             this._customScrollbar.dispose();
         }

@@ -6,6 +6,7 @@ export declare class ScrollView extends ViewBase<Types.ScrollViewProps, {}> impl
     constructor(props: Types.ScrollViewProps);
     private _customScrollbar;
     private _customScrollbarEnabled;
+    private _mounted;
     private _dragging;
     componentDidUpdate(): void;
     render(): JSX.Element;
