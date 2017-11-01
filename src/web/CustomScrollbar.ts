@@ -156,6 +156,8 @@ const _customScrollbarCss = `
     }
 `;
 
+let _nextId = 1;
+
 export class Scrollbar {
     private _container: HTMLElement;
     private _verticalBar: IScrollbarInfo = {};
@@ -232,12 +234,16 @@ export class Scrollbar {
         head.appendChild(style);
     }
 
+    private _id = _nextId++;
+
     constructor(container: HTMLElement) {
         if (!container) {
             throw new Error('Container must not be null');
         }
 
         this._container = container;
+
+        this._logError('scrollbar created');
     }
 
     private _tryLtrOverride() {
@@ -401,6 +407,9 @@ export class Scrollbar {
         this._container.classList.add(containerClass);
         this._container.classList.add('rxCustomScroll');
         this._viewport = this._container.querySelector('.scrollViewport') as HTMLElement;
+        if (!this._viewport) {
+            this._logError('viewport not found');
+        }
     }
 
     private _removeScrollbars() {
@@ -444,11 +453,58 @@ export class Scrollbar {
 
     private _resize() {
         if (this._hasHorizontal) {
+            if (!this._viewport) {
+                this._logError('no viewport (horizontal)');
+            }
             this._calcNewBarSize(this._horizontalBar, this._viewport.offsetWidth, this._viewport.scrollWidth, this._hasVertical);
         }
 
         if (this._hasVertical) {
+            if (!this._viewport) {
+                this._logError('no viewport (vertical)');
+            }
             this._calcNewBarSize(this._verticalBar, this._viewport.offsetHeight, this._viewport.scrollHeight, this._hasHorizontal);
+        }
+    }
+
+    private _logError(errorString: string) {
+        try {
+            throw new Error('-- ' + errorString + ' --');
+        } catch (e) {
+            console.error('CustomScrollbar.ts ' + this._id + ': ' + errorString + ': ' + Scrollbar.errorAsString(e));
+        }
+    }
+    
+    static errorAsString(err: any): string {
+        if (err && err.code && err.message) {
+            return err.code + ':' + err.message;
+        }
+        if (err instanceof Error) {
+            return err.toString();
+        }
+        if (err && err.errorMessage) {
+            return err.errorMessage;
+        }
+        return this.asString(err);
+    }
+
+    static asString(object: any): string {
+        if (object === null) {
+            return 'null';
+        } else if (object === undefined) {
+            return 'undefined';
+        }
+
+        let type = typeof object;
+
+        if (type === 'string') {
+            return <string>object;
+        } else if (type === 'number' || type === 'boolean') {
+            return String(object);
+        } else if (type === 'function') {
+            return '';
+        } else {
+            return JSON.stringify(object);
         }
     }
 
@@ -505,10 +561,11 @@ export class Scrollbar {
         this.hide();
         this._removeScrollbars();
         // release DOM nodes
-        this._container = null;
-        this._viewport = null;
-        this._verticalBar = null;
-        this._horizontalBar = null;
+        this._container = null!!!;
+        this._viewport = null!!!;
+        this._logError('viewport disposed');
+        this._verticalBar = null!!!;
+        this._horizontalBar = null!!!;
     }
 }
 
